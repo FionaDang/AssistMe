@@ -1,0 +1,37 @@
+﻿# AssistMe
+
+AssistMe is a mobile-first patient communication PWA. It provides large buttons for common needs, displays every request in English and Simplified Chinese, and can read either language aloud using the device browser's speech synthesis.
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+For a production build:
+
+```bash
+npm run build
+npm run preview
+```
+
+The app stores caregiver category edits in the browser's local storage. The service worker caches the app shell and runtime assets so an installed app can continue working without an internet connection. Speech depends on the voices available on the device and is always optional.
+
+## Test on an iPhone
+
+For a quick browser test on the same Wi-Fi network, run:
+
+```bash
+npm run dev -- --host=0.0.0.0
+```
+
+Find the computer's local IPv4 address with `ipconfig`, then open `http://YOUR-IP:5173` in iPhone Safari. This is useful for checking the layout, buttons, and speech, but service-worker installation and offline mode require HTTPS (or localhost).
+
+For a realistic iPhone/offline test, deploy the production build to an HTTPS host such as GitHub Pages, Netlify, or Vercel. Open that HTTPS URL in Safari, tap Share, choose **Add to Home Screen**, open the new AssistMe icon once while online, then turn on Airplane Mode and reopen it. Confirm that categories, saved caregiver edits, and the text interface still work. Download a Chinese voice in the iPhone's spoken-content voice settings if Chinese speech is unavailable.
+
+## How patients eventually get it
+
+The simplest distribution is the PWA: give patients the HTTPS URL and have them use **Add to Home Screen**. It launches full-screen and can work offline after its first online load. No App Store account is needed for this route.
+
+An App Store version would require packaging this web app with a tool such as Capacitor, joining the Apple Developer Program, and submitting through Apple's review process. iOS builds and signing normally require Xcode on a Mac. The PWA route is the recommended first release because it keeps one codebase and supports both iPhone and Android.
