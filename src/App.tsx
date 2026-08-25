@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { copy, defaultCategories } from './data'
 import { speak } from './speech'
+import { translateBest } from './translate'
 import type { Category, Need } from './types'
 
 const STORAGE_KEY = 'assistme-categories-v1'
@@ -20,8 +21,23 @@ function App() {
   const [selected, setSelected] = useState<Need | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [speechMessage, setSpeechMessage] = useState('')
+  const [addCategoryId, setAddCategoryId] = useState<string | null>(null)
+  const [newEnglish, setNewEnglish] = useState('')
+  const [newChinese, setNewChinese] = useState('')
+  const [translationMessage, setTranslationMessage] = useState('')
+  const [isTranslating, setIsTranslating] = useState(false)
+  const [isOnline, setIsOnline] = useState(() => navigator.onLine)
 
   useEffect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(categories)), [categories])
+  useEffect(() => {
+    const updateOnlineStatus = () => setIsOnline(navigator.onLine)
+    window.addEventListener('online', updateOnlineStatus)
+    window.addEventListener('offline', updateOnlineStatus)
+    return () => {
+      window.removeEventListener('online', updateOnlineStatus)
+      window.removeEventListener('offline', updateOnlineStatus)
+    }
+  }, [])
 
   function chooseNeed(need: Need) {
     setSelected(need)
@@ -34,6 +50,42 @@ function App() {
 
   function resetCategories() {
     if (window.confirm('Reset all requests to the original defaults?')) setCategories(defaultCategories)
+  }
+
+  async function addRequest(categoryId: string) {
+    let english = newEnglish.trim()
+    let chinese = newChinese.trim()
+    setIsTranslating(true)
+    if (!english && chinese) english = await translateBest(chinese, 'chinese') ?? ''
+    if (!chinese && english) chinese = await translateBest(english, 'english') ?? ''
+    setIsTranslating(false)
+    if (!english || !chinese) {
+      setTranslationMessage('This phrase is not in the offline translator. Please enter both languages.')
+      return
+    }
+    setCategories(categories.map((category) => category.id === categoryId
+      ? { ...category, needs: [...category.needs, { id: `custom-${Date.now()}`, english, chinese }] }
+      : category))
+    setNewEnglish('')
+    setNewChinese('')
+    setTranslationMessage('')
+    setAddCategoryId(null)
+  }
+
+  async function fillChineseFromEnglish() {
+    if (!newEnglish.trim() || newChinese.trim()) return
+    setIsTranslating(true)
+    const translated = await translateBest(newEnglish, 'english')
+    setIsTranslating(false)
+    if (translated) setNewChinese(translated)
+  }
+
+  async function fillEnglishFromChinese() {
+    if (!newChinese.trim() || newEnglish.trim()) return
+    setIsTranslating(true)
+    const translated = await translateBest(newChinese, 'chinese')
+    setIsTranslating(false)
+    if (translated) setNewEnglish(translated)
   }
 
   return (
@@ -62,7 +114,7 @@ function App() {
 
       {!selected && !activeCategory && <section className="category-grid" aria-label="Categories">{categories.map((category) => <button className={`category-card ${category.color}`} key={category.id} onClick={() => setActiveCategory(category)}><span className="category-number">0{categories.indexOf(category) + 1}</span><strong>{category.english}</strong><span>{category.chinese}</span><small>{category.needs.length} requests</small></button>)}</section>}
 
-      {settingsOpen && <aside className="settings-panel" aria-label={copy.settings}><div className="settings-header"><div><p className="eyebrow">CAREGIVER MODE</p><h2>{copy.settings}</h2></div><button onClick={() => setSettingsOpen(false)} aria-label={copy.close}>×</button></div><p className="edit-hint">{copy.editHint}</p>{categories.map((category) => <label className="edit-row" key={category.id}><span>{category.english} / {category.chinese}</span><input value={category.english} onChange={(event) => setCategories(categories.map((item) => item.id === category.id ? { ...item, english: event.target.value } : item))} aria-label={`Edit ${category.english}`} /></label>)}<button className="reset-button" onClick={resetCategories}>{copy.reset}</button><button className="add-button" disabled>{copy.add}</button></aside>}
+      {settingsOpen && <aside className="settings-panel" aria-label={copy.settings}><div className="settings-header"><div><p className="eyebrow">CAREGIVER MODE</p><h2>{copy.settings}</h2></div><button onClick={() => setSettingsOpen(false)} aria-label={copy.close}>×</button></div><p className="edit-hint">{copy.editHint}</p>{categories.map((category) => <div className="settings-category" key={category.id}><label className="edit-row"><span>{category.english} / {category.chinese}</span><input value={category.english} onChange={(event) => setCategories(categories.map((item) => item.id === category.id ? { ...item, english: event.target.value } : item))} aria-label={`Edit ${category.english}`} /></label>{addCategoryId === category.id ? <div className="add-form"><input value={newEnglish} onChange={(event) => setNewEnglish(event.target.value)} onBlur={fillChineseFromEnglish} placeholder="English request (optional)" aria-label="New request in English" /><input value={newChinese} onChange={(event) => setNewChinese(event.target.value)} onBlur={fillEnglishFromChinese} placeholder="Chinese request (optional)" aria-label="New request in Chinese" /><p className="form-hint">{isOnline ? 'Online translation is enabled for better results. Text may be sent to a translation service.' : 'Offline mode: common phrases translate automatically.'}</p>{isTranslating && <p className="form-hint" role="status">Translating...</p>}{translationMessage && <p className="form-error" role="alert">{translationMessage}</p>}<div><button onClick={() => addRequest(category.id)} disabled={isTranslating}>Save request</button><button onClick={() => { setAddCategoryId(null); setTranslationMessage('') }}>Cancel</button></div></div> : <button className="add-request-link" onClick={() => setAddCategoryId(category.id)}>+ {copy.add}</button>}</div>)}<button className="reset-button" onClick={resetCategories}>{copy.reset}</button></aside>}
     </main>
   )
 }
