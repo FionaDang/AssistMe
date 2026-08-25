@@ -5,6 +5,10 @@ function topicFor(code: string) {
   return `assistme-${code.toLowerCase().replace(/[^a-z0-9]/g, '')}`
 }
 
+export function getSummonTopic(code: string) {
+  return topicFor(code)
+}
+
 export function getSummonCode() {
   const existing = localStorage.getItem(CODE_KEY)
   if (existing) return existing
