@@ -81,6 +81,9 @@ function App() {
     } catch {
       setSummonMessage('Could not reach the caregiver')
     }
+  function openNotificationSetup() {
+    window.open(`https://ntfy.sh/${getSummonTopic(summonCode)}`, '_blank', 'noopener,noreferrer')
+  }
   }
 
   function updateSummonCode(value: string) {

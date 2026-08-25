@@ -44,3 +44,5 @@ The current browser relay cannot wake a phone that is fully powered off, and an 
 For a small test with two devices, a custom backend is not necessary. Use the current ntfy relay. On the caregiver device, install the ntfy app, subscribe to the notification topic shown in AssistMe Settings (for example, `assistme-a1b2c3d4`), and enable its sound notifications. Use the same connection code in AssistMe on both devices. The patient can then summon from AssistMe while the caregiver receives the ntfy notification even when the AssistMe page is closed.
 
 This MVP topic is public and should not contain names, medical details, or selected requests. It is only for testing. Replace it with authenticated Web Push before real patient use.
+
+AssistMe's browser notification permission is only for the caregiver page while it is available. For closed-app iPhone notifications in this MVP, install the ntfy app on the caregiver iPhone, subscribe to the topic shown in AssistMe Settings, and enable ntfy sound notifications. The **Open notification setup** button opens the topic page to make that setup easier.

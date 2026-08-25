@@ -34,5 +34,6 @@ h1, h2 { font-family: Fraunces, serif; font-weight: 600; }
 .sound-test { margin-top: 12px; padding: 9px 12px; border: 1px solid #183b3b; border-radius: 3px; background: transparent; color: #183b3b; font-size: 12px; }
 .topic-label { margin: 12px 0; color: #6e7974; font-size: 11px; overflow-wrap: anywhere; }.topic-label code { color: #183b3b; }
 .category-settings { margin: 18px 0 8px; padding-bottom: 18px; border-bottom: 1px solid #d8d1c6; }.category-settings h3 { margin: 0 0 10px; font-size: 16px; }.category-form { display: grid; gap: 8px; }.category-form input { padding: 10px; border: 1px solid #d8d1c6; border-radius: 3px; background: #f5f0e8; }.category-form button { width: fit-content; padding: 9px 12px; border: 0; border-radius: 3px; background: #183b3b; color: #fffaf3; }
+.notification-setup { margin-top: 8px; padding: 10px 12px; border: 1px solid #d65b45; border-radius: 3px; background: transparent; color: #b34635; font-size: 12px; }
 @media (min-width: 560px) { .app-shell { padding: 32px 34px 60px; }.category-grid { grid-template-columns: repeat(2, 1fr); }.category-card:last-child { grid-column: span 2; } }
 @media (prefers-reduced-motion: reduce) { .category-card { transition: none; } }
